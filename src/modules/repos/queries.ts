@@ -1,8 +1,17 @@
 import { gql } from '@apollo/client';
 
 export const REPO_LIST_QUERY = gql`
-  query GetRepositoryListQuery($searchQuery: String!, $cursor: String) {
-    search(query: $searchQuery, type: REPOSITORY, first: 15, after: $cursor) {
+  query GetRepositoryListQuery(
+    $searchQuery: String!
+    $cursor: String
+    $first: Int!
+  ) {
+    search(
+      query: $searchQuery
+      type: REPOSITORY
+      first: $first
+      after: $cursor
+    ) {
       repositoryCount
       pageInfo {
         endCursor

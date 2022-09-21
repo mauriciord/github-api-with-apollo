@@ -1,6 +1,6 @@
 import React from 'react';
 import { useQuery } from '@apollo/client';
-import { Alert, AlertIcon, VStack } from '@chakra-ui/react';
+import { Alert, AlertIcon, VStack, Heading, Skeleton } from '@chakra-ui/react';
 import { Button } from '@chakra-ui/react';
 
 import { RepositoryProps } from '../types';
@@ -23,6 +23,7 @@ const RepoList = ({ list }: Props) => {
     errorPolicy: 'all',
     variables: {
       searchQuery,
+      first: 5,
     },
   });
 
@@ -33,7 +34,14 @@ const RepoList = ({ list }: Props) => {
         There was an error processing your request
       </Alert>
     );
-  if (loading) return <p>Loading...</p>;
+  if (loading)
+    return (
+      <VStack align="center" justify="center" justifyContent="center">
+        <Skeleton height="60px" />
+        <Skeleton height="60px" />
+        <Skeleton height="60px" />
+      </VStack>
+    );
 
   const { search } = data ?? [];
   const {
@@ -51,6 +59,7 @@ const RepoList = ({ list }: Props) => {
       variables: {
         searchQuery,
         cursor: endCursor,
+        first: 5,
       },
       updateQuery: (previousResult, { fetchMoreResult }) => {
         if (!fetchMoreResult) return previousResult;
@@ -68,16 +77,24 @@ const RepoList = ({ list }: Props) => {
   return (
     <>
       <VStack align="center" justify="center" justifyContent="center">
-        {repos?.map(({ node }: NodeProps) => {
-          return <RepoCard key={node.id} repo={node} />;
-        })}
-        <Button
-          colorScheme="facebook"
-          disabled={!hasNextPage}
-          onClick={fetchMoreRepos}
-        >
-          Load more
-        </Button>
+        {query.length > 1 &&
+          repos?.map(({ node }: NodeProps) => {
+            return <RepoCard key={node.id} repo={node} />;
+          })}
+        {query.length > 1 && (
+          <Button
+            colorScheme="facebook"
+            disabled={!hasNextPage}
+            onClick={fetchMoreRepos}
+          >
+            Load more
+          </Button>
+        )}
+        {query.length <= 1 && (
+          <Heading as="h2" size="xl">
+            Type something to start searching...
+          </Heading>
+        )}
       </VStack>
     </>
   );
